@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Parking Permit Renewal Lambda Function'
+
+Resources:
+  ParkingPermitFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: parking-permit-renewal
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: deployment_package.zip
+      Runtime: python3.9
+      Timeout: 300
+      MemorySize: 512
+      Layers:
+        - !Ref SeleniumLayer
+
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+
+  DailyTriggerRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: parking-permit-daily-trigger
+      ScheduleExpression: 'cron(0 12 * * ? *)'
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt ParkingPermitFunction.Arn
+          Id: ParkingPermitFunctionTarget
