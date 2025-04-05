@@ -20,6 +20,7 @@ This project automates the daily renewal of parking permits using AWS Lambda wit
 
 ## Project Structure
 
+```md
 aws_lambda/
 ├── .aws-sam/ # SAM deployment artifacts (do not commit to version control)
 ├── prezip/ # Directory for pre-zipped files
@@ -30,6 +31,7 @@ aws_lambda/
 ├── build.sh # Build script for deployment package
 ├── deployment_package.zip # Packaged Lambda function
 └── selenium_layer.zip # Selenium and Chrome dependencies
+```
 
 ## Key Components
 
