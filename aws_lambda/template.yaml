@@ -3,14 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: 'Parking Permit Renewal Lambda Function'
 
 Resources:
-  SeleniumLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: selenium-chrome-layer
-      ContentUri: selenium_layer.zip
-      CompatibleRuntimes:
-        - python3.9
-
   ParkingPermitFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -21,16 +13,14 @@ Resources:
       Timeout: 300
       MemorySize: 512
       Layers:
-        - !Ref SeleniumLayer
+        - arn:aws:lambda:us-east-1:764866452798:layer:chrome-selenium:31
       Policies:
         - AWSLambdaBasicExecutionRole
-
-  DailyTriggerRule:
-    Type: AWS::Events::Rule
-    Properties:
-      Name: parking-permit-daily-trigger
-      ScheduleExpression: 'cron(0 12 * * ? *)'
-      State: ENABLED
-      Targets:
-        - Arn: !GetAtt ParkingPermitFunction.Arn
-          Id: ParkingPermitFunctionTarget
+      Events:
+        ScheduleEvent:
+          Type: Schedule
+          Properties:
+            Schedule: 'cron(0 12 * * ? *)'
+            Name: parking-permit-daily-trigger
+            Description: 'Daily trigger for parking permit renewal'
+            Enabled: true
