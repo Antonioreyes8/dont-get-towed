@@ -1,36 +1,32 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Description: 'Parking Permit Renewal Lambda Function'
 
 Resources:
+  SeleniumLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: selenium-chrome-layer
+      ContentUri: selenium_layer.zip
+      CompatibleRuntimes:
+        - python3.9
+
   ParkingPermitFunction:
-    Type: 'AWS::Lambda::Function'
+    Type: AWS::Serverless::Function
     Properties:
       FunctionName: parking-permit-renewal
       Handler: lambda_function.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Code:
-        ZipFile: deployment_package.zip
       Runtime: python3.9
+      CodeUri: deployment_package.zip
       Timeout: 300
       MemorySize: 512
       Layers:
         - !Ref SeleniumLayer
-
-  LambdaExecutionRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: 'sts:AssumeRole'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - AWSLambdaBasicExecutionRole
 
   DailyTriggerRule:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties:
       Name: parking-permit-daily-trigger
       ScheduleExpression: 'cron(0 12 * * ? *)'
